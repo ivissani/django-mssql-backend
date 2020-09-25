@@ -71,3 +71,11 @@ class TestRemoveOneToOneFieldModel(models.Model):
     # thats already is removed.
     # b = models.OneToOneField('self', on_delete=models.SET_NULL, null=True)
     a = models.CharField(max_length=50)
+
+
+class TestAlterNullableInUniqueField(models.Model):
+    """ Model used to test a single migration that creates a field with unique=True and null=True and then alters
+    the field to set null=False. This is a common use case when you want to add a non-nullable unique field to a
+    pre-existing model. In order to make that work you need to first create the unique field as nullable, then
+    populate the field for every pre-existing instance, and then alter the field to set it to non-nullaable. """
+    a = models.CharField(max_length=50, unique=True, null=True)
