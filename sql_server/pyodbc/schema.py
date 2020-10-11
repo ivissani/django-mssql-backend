@@ -459,7 +459,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 )
             else:
                 self.execute(self._create_unique_sql(model, [new_field.column]))
-            self._delete_deferred_unique_indexes_for_field(old_field)
+            self._delete_deferred_unique_indexes_for_field(new_field)
         # Added an index?
         # constraint will no longer be used in lieu of an index. The following
         # lines from the truth table show all True cases; the rest are False:
