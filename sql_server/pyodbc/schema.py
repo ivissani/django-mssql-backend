@@ -240,11 +240,14 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
         return super().alter_db_table(model, old_db_table, new_db_table)
 
-    def _delete_deferred_unique_indexes_for_field(self, field_name):
-        deferred_statements = self._deferred_unique_indexes.get(field_name, [])
+    def _delete_deferred_unique_indexes_for_field(self, field):
+        deferred_statements = self._deferred_unique_indexes.get(str(field), [])
         for stmt in deferred_statements:
             if stmt in self.deferred_sql:
                 self.deferred_sql.remove(stmt)
+
+    def _add_deferred_unique_index_for_field(self, field, statement):
+        self._deferred_unique_indexes[str(field)].append(statement)
 
     def _alter_field(self, model, old_field, new_field, old_type, new_type,
                      old_db_params, new_db_params, strict=False):
@@ -660,7 +663,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 model, [field], sql=self.sql_create_unique_null, suffix="_uniq"
             )
             self.deferred_sql.append(statement)
-            self._deferred_unique_indexes[field].append(statement)
+            self._add_deferred_unique_index_for_field(field, statement)
 
         # Check constraints can go on the column SQL here
         db_params = field.db_parameters(connection=self.connection)
@@ -768,7 +771,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                     model, [field], sql=self.sql_create_unique_null, suffix="_uniq"
                 )
                 self.deferred_sql.append(statement)
-                self._deferred_unique_indexes[field].append(statement)
+                self._add_deferred_unique_index_for_field(field, statement)
 
             # Check constraints can go on the column SQL here
             db_params = field.db_parameters(connection=self.connection)
